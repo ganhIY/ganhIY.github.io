@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <!-- CSS only -->
+  <title>SMART LIGHT SYSTEM</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.2.0/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.datatables.net/1.12.1/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+
+
+  <script src=" https://code.jquery.com/jquery-3.5.1.js"> </script>
+  <script src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.datatables.net/1.12.1/js/dataTables.bootstrap5.min.js"></script>"
+  <style>
+   
+    body {
+      z-index: -1;
+      font-family: 'Exo 2', sans-serif;
+    }
+
+   
+
+
+
+    @import url(https://fonts.googleapis.com/css?family=Exo+2:200i);
+
+    :root {
+      /* Base font size */
+      font-size: 10px;
+
+      /* Set neon color */
+      --neon-text-color: black;
+      --neon-border-color: #08f;
+    }
+
+
+
+    h1 {
+      width: 75%;
+      margin-left: auto;      
+      margin-right: auto;
+      border: 1px black;
+      font-size: 5rem;
+      font-weight: 50;
+      font-style: italic;
+      color: black;
+      border: 0.4rem solid #fff;
+      border-radius: 2rem;
+      text-transform: uppercase;
+      animation: flicker 1.5s infinite alternate;
+      text-align: center;
+    }
+
+    h1::-moz-selection {
+      background-color: var(--neon-border-color);
+      color: var(--neon-text-color);
+    }
+
+    h1::selection {
+      background-color: var(--neon-border-color);
+      color: var(--neon-text-color);
+    }
+
+    h1:focus {
+      outline: none;
+    }
+
+    #title{
+      width: 100%;
+      height: 90px;
+      position: absolute;
+      z-index: 3;
+      background-color: white;
+    }
+    /* Animate neon flicker */
+    @keyframes flicker {
+
+      0%,
+      19%,
+      21%,
+      23%,
+      25%,
+      54%,
+      56%,
+      100% {
+
+        text-shadow:
+          -0.1rem -0.2rem 1rem #fff,
+          0.2rem 0.2rem 1rem #fff,
+          0 0 2rem var(--neon-text-color),
+          0 0 4rem var(--neon-text-color),
+          0 0 6rem var(--neon-text-color),
+          0 0 8rem var(--neon-text-color),
+          0 0 10rem var(--neon-text-color);
+
+        box-shadow:
+          0 0 .5rem #fff,
+          inset 0 0 .5rem #fff,
+          0 0 2rem var(--neon-border-color),
+          inset 0 0 2rem var(--neon-border-color),
+          0 0 4rem var(--neon-border-color),
+          inset 0 0 4rem var(--neon-border-color);
+      }
+
+      20%,
+      24%,
+      55% {
+        text-shadow: none;
+        box-shadow: none;
+      }
+      
+    }
+
+   
+  </style>
+
+
+</head>
+
+
+<body>
+
+  <div id="title">
+    <h1 contenteditable spellcheck="false">Smart Light System</h1>
+  </div>
+  <script src="./js/app.js">
+  </script>
+  <div class="container mt-3">
+    <div class="row">
+      <table id="holiao" class="table table-striped" style="width: 100%;">
+
+        <thead>
+          <tr>
+            <th scope="col">Records</th>
+            <th scope="col">Date</th>
+            <th scope="col">Total Vehicle Pass By</th>
+          </tr>
+        </thead>
+
+        <tbody id="content">
+        </tbody>
+      </table>
+
+
+
+    </div>
+
+    <div id="please">
+
+    </div>
+
+
+  </div>
+
+  <script type="module">
+
+    // Import the functions you need from the SDKs you need
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.10.0/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.10.0/firebase-analytics.js";
+    // TODO: Add SDKs for Firebase products that you want to use
+    // https://firebase.google.com/docs/web/setup#available-libraries
+
+    // Your web app's Firebase configuration
+    // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+    const firebaseConfig = {
+      apiKey: "AIzaSyCTFIv4dQhqABlHGDjJxKZTuaFGrCPGndA",
+      authDomain: "iotpractical-3a0ae.firebaseapp.com",
+      databaseURL: "https://iotpractical-3a0ae-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "iotpractical-3a0ae",
+      storageBucket: "iotpractical-3a0ae.appspot.com",
+      messagingSenderId: "972422131400",
+      appId: "1:972422131400:web:72801f1c998cbe762cbffd",
+      measurementId: "G-ZYZD70C9T5"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+
+    import { getDatabase, ref, child, onValue, get }
+      from "https://www.gstatic.com/firebasejs/9.10.0/firebase-database.js";
+    const analytics = getAnalytics(app);
+    const db = getDatabase();
+
+    var stdNo = 0;
+    document.getElementById("content").innerHTML = "";
+
+
+
+
+    let tbody = document.getElementById("content");
+
+
+
+    window.onload = GetAllDataOnce();
+
+    function AddItemToTable(student, length) {
+      var date = "";
+      var time = "";
+
+
+
+      for (var i = 0; i < length; i++) {
+        let trow = document.createElement("tr");
+        let td1 = document.createElement('td');
+        let td2 = document.createElement('td');
+        let td3 = document.createElement('td');
+
+        // document.getElementById("t1").innerHTML = ++stdNo;
+        date = Object.keys(student[0])[i];
+        // document.getElementById("t2").innerHTML = date;
+        time = Object.values(student[0])[i];
+        // document.getElementById("t3").innerHTML = Object.keys(student[0])[0];
+
+        var dateFormat =  date.substring(2,4) + "/" + date.substring(0,2) + "/" +date.substring(4);
+        td1.innerHTML = ++stdNo;
+        td2.innerHTML = dateFormat;
+        td3.innerHTML = time;
+
+        trow.appendChild(td1);
+        trow.appendChild(td2);
+        trow.appendChild(td3);
+        tbody.appendChild(trow);
+
+
+
+      }
+
+      clone();
+
+    }
+
+    var today = new Date();
+    var dd = String(today.getDate()).padStart(2, '0');
+    var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+    var yyyy = today.getFullYear();
+    var date = [];
+    var time = [];
+
+    today = mm + dd + yyyy;
+
+
+    function AddAllItemsToTable(TheStudent) {
+      console.log(TheStudent);
+
+      stdNo = 0;
+      tbody.innerHTML = "";
+
+
+      TheStudent.forEach(element => {
+        console.log(Object.keys(TheStudent[0])[1]);
+        AddItemToTable(TheStudent, Object.keys(TheStudent[0]).length);
+      });
+    }
+
+
+
+
+    function GetAllDataOnce() {
+      const dbRef = ref(db);
+
+      get(dbRef, "TrafficCondition")
+        .then((snapshot) => {
+
+          var students = [];
+          console.log("students array");
+
+          snapshot.forEach(childSnapshot => {
+            students.push(childSnapshot.val());
+          });
+
+          console.log(students);
+          AddAllItemsToTable(students);
+        });
+    }
+
+    function GetAllDataRealtime() {
+      const dbRef = ref(db, "TrafficCondition");
+      console.log("halo");
+      onValue(dbRef, (snapshot) => {
+        var students = [];
+
+        snapshot.forEach(childSnapshot => {
+          students.push(childSnapshot.val());
+        });
+
+        AddAllItemsToTable(students);
+
+      });
+    }
+
+
+
+
+
+  </script>
+
+  <script>
+    function clone() {
+
+
+      myTable = document.getElementsByTagName("table")[0];
+      myClone = myTable.cloneNode(true);
+      myClone.id = "example2";
+      //document.body.appendChild(myClone);
+      const addDiv =
+        document.getElementById("please").appendChild(myClone);
+
+      $(document).ready(function () {
+        $('#example2').DataTable();
+      });
+    }
+    document.getElementById("please").style.backgroundColor = "white";
+    document.getElementById("holiao").style.zIndex = "-1";
+    document.getElementById("example2").style.zIndex = "1";
+
+
+
+  </script>
+
+</body>
+
+</html>
